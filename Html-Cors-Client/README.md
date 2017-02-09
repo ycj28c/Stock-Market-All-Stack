@@ -7,6 +7,7 @@ CORS WebService Client
 
 2.Use CORS technology, the Jersey WebService also have to setting fiter to accept the http request
 
+```
 @Provider
 public class AccessControlResponseFilter implements ContainerResponseFilter {
 
@@ -20,17 +21,20 @@ public class AccessControlResponseFilter implements ContainerResponseFilter {
         headers.add("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS, HEAD");
     }
 }
+```
 
 And implement it to the applicaion setting
 
 @ApplicationPath("/")
 public class DBMS extends ResourceConfig {
 
+```
 	public DBMS() {
 		.......
 		//CORS, add the line below
 		register(AccessControlResponseFilter.class);
 	}
+```
 }
 
 3.One thing waste me lots of time is
@@ -41,6 +45,7 @@ public class DBMS extends ResourceConfig {
 
 4.something the browse will change the POST and PUT request to OPTIONS request, make sure you have set the right ajax request, like
 
+```
 function buyStock(sid,amount){
 	var jsonMsg = {'userID':'1','sid':sid,'shares':amount}; 
 	
@@ -62,18 +67,11 @@ function buyStock(sid,amount){
     
 　　　　processData: false,
     
-　　　　success: function (json) { 
-    
-			alert("buy stock success!");
-			
-		},
+　　　　success: function (json) { alert("buy stock success!"); },
 		
-　　　　error: function (error) {
-    
-　　　　		alert("ERROR" + error.responseText);
-		
-　　		}
+　　　　error: function (error) { alert("ERROR" + error.responseText); }
 	});
 }
+```
 
 5.support google chrome, didn't test other browse
