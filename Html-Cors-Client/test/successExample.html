@@ -1,0 +1,39 @@
+﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>getJSON获取数据_www.jbxue.com</title>
+<script type="text/javascript" src="js/jquery-1.8.2.min.js"></script>
+<style type="text/css">
+#divframe{ border:1px solid #999; width:500px; margin:0 auto;}
+.loadTitle{ background:#CCC; height:30px;}
+</style>
+<script type="text/javascript">
+$(function(){
+	$("#btn").click(function(){
+		$.getJSON("http://localhost:8080/WebServices/stocks",function(data){
+			var $jsontip = $("#jsonTip");
+			var strHtml = "123";//存储数据的变量
+			$jsontip.empty();//清空内容
+			$.each(data,function(infoIndex,info){
+				strHtml += "姓名："+info["Sid"]+"<br>";
+				strHtml += "性别："+info["Name"]+"<br>";
+				strHtml += "邮箱："+info["Price_share"]+"<br>";
+				strHtml += "<hr>"
+			})
+			$jsontip.html(strHtml);//显示处理后的数据
+		})
+	})
+})
+</script>
+</head>
+<body>
+<div id="divframe">
+<div class="loadTitle">
+<input type="button" value="获取数据" id="btn"/>
+</div>
+<div id="jsonTip">
+</div>
+</div>
+</body>
+</html>

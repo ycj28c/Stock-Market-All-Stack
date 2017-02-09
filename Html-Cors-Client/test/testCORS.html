@@ -1,0 +1,59 @@
+﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+ <html xmlns="http://www.w3.org/1999/xhtml" >
+ <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+ <head>
+     <title>jsonp测试例子</title>
+     <script type="text/javascript" src="js/jquery-1.8.2.min.js"></script>
+     <script type="text/javascript">
+		var $ = jQuery.noConflict();
+            $.ajax( {
+                cache: false,
+                crossDomain: true,
+                dataType: "json",
+                url: "http://localhost:8080/WebServices/stocks",
+                type: "GET",
+                success: function( jsonObj, textStatus, xhr ) {
+					alert(jsonObj);
+                },
+                error: function( xhr, textStatus, errorThrown ) {
+                    console.log( "HTTP Status: " + xhr.status );
+                    console.log( "Error textStatus: " + textStatus );
+                    console.log( "Error thrown: " + errorThrown );
+                }
+            } );
+	 
+	 
+		var xhr = new XMLHttpRequest();
+		xhr.open("GET", "http://localhost:8080/WebServices/market");
+		xhr.setRequestHeader('Authorization', 'a');
+		xhr.send();
+	 
+	 
+		var url= "http://localhost:8080/WebServices/stocks/000001";
+		var postobject={id:2,name:"Bob9",addresses:[{street:"Long Street 1",town:"Short Village"}],id_attribute:888};
+
+		jQuery.ajax({
+			url: url,
+			type: "GET",
+			//data: $.toJSON(postobject),
+			dataType: "json",
+			contentType:"application/json",
+			success: function(result) {
+                //Write your code here
+                //alert(result);
+                $.get(
+					url,
+					function(data, textStatus, jqXHR) {
+						alert(data);
+					},
+					"json"
+				);
+			}
+		});
+     </script>
+     </head>
+  <body>
+  <input type="button" value="点击获取远程数据" onclick="CallJSONPServer('http://www.yzswyl.cn/demos/jsonp_original.php')" />
+  <div id="remote"></div> 
+  </body>
+ </html>

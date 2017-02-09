@@ -1,0 +1,297 @@
+﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>Stock Market</title>
+<script type="text/javascript" src="js/jquery-1.8.2.min.js"></script>
+
+<link href="css/styles.css" rel="stylesheet" type="text/css" />
+
+<script type="text/javascript">
+$(function(){
+	refreshPage();
+
+	$("#btn").click(function(){
+		refreshEvent();
+		refreshPage();
+	})
+	
+	$("#buy_btn").click(function(){
+		var sid = $('#stockid').val();
+		var amount = $('#amount').val();
+		//alert(sid+amount);
+		buyStock(sid,amount);
+		refreshPage();
+	})
+	
+	$("#sell_btn").click(function(){
+		var sid = $('#stockid').val();
+		var amount = $('#amount').val();
+		//alert(sid+amount);
+		sellStock(sid,amount);
+		refreshPage();
+	})
+	
+	$("#sellall_btn").click(function(){
+		var sid = $('#stockid').val();
+		sellAllStock(sid);
+		refreshPage();
+	})
+	
+})
+
+function refreshPage(){
+	getStocks();
+	getMarket();
+	getHold(1);
+	getEvent();
+	getUser(1);
+}
+
+function getMarket(){
+	$.getJSON("http://localhost:8080/WebServices/market", function(data) {
+        $("#marketDIV").html("");
+        var strHtml = "";
+		strHtml += "MarketIndex: "+data.MarketIndex+"<br>";
+		strHtml += "VariationRange: "+(data.VariationRange*100).toFixed(2)+"%"+"<br>";
+		strHtml += "OverallCapital: "+data.OverallCapital+"<br>";
+		strHtml += "<hr>";
+		$("#marketDIV").append(strHtml);
+    });
+}
+
+function getStocks(){
+	$("#stocks tr:not(:nth-child(1))").remove(); 
+	$.getJSON("http://localhost:8080/WebServices/stocks",function(data){
+		$.each(data,function(infoIndex,info){
+			var newRow = "<tr><td>"+info["Sid"]+"</td><td>"+info["Name"]+"</td><td>"+info["Price_share"]+"</td><td>"+(info["Variation_Range"]*100).toFixed(2)+"%"+"</td></tr>";
+			$("#stocks tr:eq(0)").after(newRow);
+		})
+	})
+}
+
+function getHold(userid){
+	$("#hold tr:not(:nth-child(1))").remove(); 
+	$.getJSON("http://localhost:8080/WebServices/"+userid+"/hold",function(data){
+		$.each(data,function(infoIndex,info){
+			var newRow = "<tr><td>"+info["Sid"]+"</td><td>"+info["Name"]+"</td><td>"+info["shares"]+"</td></tr>";
+			$("#hold tr:eq(0)").after(newRow);
+		})
+	})
+}
+
+function refreshEvent(){
+	$.ajax({
+		type: "get",
+		url: "http://localhost:8080/WebServices/events/refresh",
+		//contentType: "application/json; charset=utf-8",
+		success: function (json) {},
+		error: function (error) {
+			alert("ERROR" + error.responseText);
+		}
+	});
+}
+
+function getEvent(){
+	$.getJSON("http://localhost:8080/WebServices/events", function(data) {
+        $("#event_text").html("");
+        var strHtml = data.incident;
+		$("#event_text").append(strHtml);
+    });
+}
+
+function getUser(userid){
+	$.getJSON("http://localhost:8080/WebServices/"+userid+"/account", function(data) {
+        $("#userDIV").html("");
+        var strHtml = "";
+		strHtml += "userID: "+data.userID+"<br>";
+		strHtml += "userName: "+data.userName+"<br>";
+		strHtml += "sex: "+data.sex+"<br>";
+		strHtml += "Assets: "+(data.Assets).toFixed(2)+"<br>";
+		strHtml += "<hr>";
+		$("#userDIV").append(strHtml);
+    });
+}
+
+function buyStock(sid,amount){
+	var jsonMsg = {'userID':'1','sid':sid,'shares':amount}; //用了大写的Sid就错了，什么情况
+	//alert(sid+jsonMsg.userID);
+	//var hold = new Hold('1', '000028', 100);
+	var message = JSON.stringify(jsonMsg);
+	$.ajax({
+　　　　type: "post",
+　　　　url: "http://localhost:8080/WebServices/1/hold/"+sid,
+　　　　contentType: "application/json",
+　　　　data: message,
+        crossDomain: true,
+		//beforeSend : function(xhr) {
+			//xhr.setRequestHeader('X-Test-Header', 'test-value');
+			//xhr.setRequestHeader("Access-Control-Allow-Origin","null");
+			//xhr.setRequestHeader("Authorization", "test");
+        //},
+　　　　dataType: "json",
+　　　　processData: false,
+　　　　success: function (json) { 
+			//alert("buy stock success!") 
+			$("#trade_result").html("");
+			$("#trade_result").append("buy stock success!");
+			
+			moveEnd(document.getElementById('showresulttext'));
+			var success = getCurrentTime()+"Buy "+amount+" of stock "+sid+ "\n\n";
+			insertText(document.getElementById('showresulttext'),success);
+		},
+　　　　error: function (error) {
+　　　　	//alert("ERROR" + error.responseText);
+			$("#trade_result").html("");
+			$("#trade_result").append("ERROR" + error.responseText);
+　　	}
+	});
+}
+
+function sellStock(sid,amount){
+	$.getJSON("http://localhost:8080/WebServices/1/hold/"+sid, function(data) {
+		var jsonMsg = {'userID':'1','sid':sid,'shares':data.shares-amount}; //用了大写的Sid就错了，什么情况
+		var message = JSON.stringify(jsonMsg);
+		$.ajax({
+	　　　　type: "put",
+	　　　　url: "http://localhost:8080/WebServices/1/hold/"+sid,
+	　　　　contentType: "application/json",
+	　　　　data: message,
+			crossDomain: true,
+	　　　　dataType: "json",
+	　　　　processData: false,
+	　　　　success: function (json) { 
+				//alert("sell stock success!") 
+				$("#trade_result").html("");
+				$("#trade_result").append("sell stock success!");
+				
+				moveEnd(document.getElementById('showresulttext'));
+				var success = getCurrentTime()+"Sell "+amount+" of stock "+sid+ "\n\n";
+				insertText(document.getElementById('showresulttext'),success);
+			},
+	　　　　error: function (error) {
+	　　　　	//alert("ERROR" + error.responseText);
+				$("#trade_result").html("");
+				$("#trade_result").append("ERROR");
+	　　	}
+		});
+    });
+}
+
+function sellAllStock(sid){
+	$.ajax({
+　　　　type: "DELETE",
+		url: "http://localhost:8080/WebServices/1/hold/"+sid,
+		contentType: "application/json; charset=utf-8",
+		success: function (json) {
+			//alert("sell all success!")
+			$("#trade_result").html("");
+			$("#trade_result").append("sell whole stock success!");
+			
+			moveEnd(document.getElementById('showresulttext'));
+			var success = getCurrentTime()+"Sell all of stock "+sid+ "\n\n";
+			insertText(document.getElementById('showresulttext'),success);
+		},
+		error: function (error) {
+			//alert("ERROR" + error.responseText);
+			$("#trade_result").html("");
+			$("#trade_result").append("ERROR");
+		}
+	});
+}
+
+// insert the string to the target textarea, example:insertText(document.getElementById('showresulttext'),"haha");
+function insertText(obj,str) {  
+	obj.focus();  
+	if (document.selection) {  
+		var sel = document.selection.createRange();  
+		sel.text = str;  
+	} else if (typeof obj.selectionStart === 'number' && typeof obj.selectionEnd === 'number') {  
+		var startPos = obj.selectionStart,  
+		endPos = obj.selectionEnd,  
+		cursorPos = startPos,  
+		tmpStr = obj.value;  
+		obj.value = tmpStr.substring(0, startPos) + str + tmpStr.substring(endPos, tmpStr.length);  
+		cursorPos += str.length;  
+		obj.selectionStart = obj.selectionEnd = cursorPos;  
+	} else {  
+		bj.value += str;  
+	}  
+}  
+//move to the end of the target textarea, example:moveEnd(document.getElementById('showresulttext'));
+function moveEnd(obj){  
+	obj.focus();  
+	var len = obj.value.length;  
+	if (document.selection) {  
+		var sel = obj.createTextRange();  
+		sel.moveStart('character',len);  
+		sel.collapse();  
+		sel.select();  
+	} else if (typeof obj.selectionStart == 'number' && typeof obj.selectionEnd == 'number') {  
+		obj.selectionStart = obj.selectionEnd = len;  
+	}   
+} 
+
+function getCurrentTime(){
+     var d=new Date(),str='';
+     str +=d.getFullYear()+'/'; 
+     str +=d.getMonth()+1+'/';
+
+     str +=d.getDate()+' ';    
+     str +=d.getHours()+':';
+     str +=d.getMinutes()+':';
+     str +=d.getSeconds()+'\n';
+     return str; 
+}
+</script>
+</head>
+<body>
+<div style="width:1000px; height:200px; position:absolute; left:40%; margin-left:-500px;">
+<div id="titleDIV" style="position:relative;left:35%;font-size:xx-large;">STOCK MARKET SIMULATION SYSTEM</div>
+<div id="userDIV" style="position: absolute;left:20%;top:110px;font-size: x-large;}"></div>
+<div id="marketDIV" style="position: absolute;left: 700px;top: 110px;font-size: x-large;}"></div>
+<div id="eventDIV" style="position: absolute;top: 50px;left: 20%;">
+	<div>
+		<div>
+			Event
+			<button type="button" id="btn" >refresh</button>
+		</div>
+		<textarea cols="127" rows="1" id="event_text" style="position:relative;top:5px;" disabled></textarea>
+	</div>
+</div>
+<div id="stockDIV" style="position: absolute;top: 220px;left:700px;">
+	<div style="font-size: x-large;">Stocks market</div>
+	<table id="stocks" cellspacing="0" align="center">
+	  <tr>
+		<th scope="col" abbr="Dual 2">Sid</th>
+		<th scope="col" abbr="Dual 2">Name</th>
+		<th scope="col" abbr="Dual 2">Price_share</th>
+		<th scope="col" abbr="Dual 2">Variation_Range</th>
+	  </tr>
+	</table>
+</div>
+<div id="holdDIV" style="position: absolute;top: 250px;left: 20%;">
+	<div style="font-size: x-large;">Personal hold</div>
+	<table id="hold" cellspacing="0" align="left">
+	  <tr>
+		<th scope="col" abbr="Dual 2">Sid</th>
+		<th scope="col" abbr="Dual 2">Name</th>
+		<th scope="col" abbr="Dual 2">Shares</th>
+	  </tr>
+	</table>
+</div>
+<div id="tradeDIV" style="position: absolute;top: 300px;left: 48%;">
+	StockId:<textarea cols="10" rows="1" id="stockid" style="resize: none;"></textarea><br><br>
+	Amount:<textarea cols="10" rows="1" id="amount" style="resize: none;"></textarea><br><br>
+	<button type="button" id="buy_btn" >Buy</button>
+	<button type="button" id="sell_btn" >Sell</button>
+	<button type="button" id="sellall_btn" >Sell All</button><br><br>
+	<div id="trade_result" style="font-size: initial;color: coral;"></div>
+</div>
+<div id = "RecordDIV" style="position: absolute;left: 44%;top: 440px;font-size: x-large;">
+	<div>Trading Record</div>
+	<textarea id='showresulttext' readonly style="margin: 0px;height: 305px;width: 210px;color: blueviolet;resize: none;"></textarea>
+</div>
+</div>
+</body>
+</html>

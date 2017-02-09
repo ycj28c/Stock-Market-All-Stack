@@ -1,0 +1,100 @@
+参考http://www.ruanyifeng.com/blog/2014/05/restful_api.html进行设计
+
+GET（SELECT）：从服务器取出资源（一项或多项）。
+POST（CREATE）：在服务器新建一个资源。
+PUT（UPDATE）：在服务器更新资源（客户端提供改变后的完整资源）。
+PATCH（UPDATE）：在服务器更新资源（客户端提供改变的属性）。(jersey没有patch)
+DELETE（DELETE）：从服务器删除资源。
+
+我们使用json格式
+
+http://服务器地址/用户id
+{
+	"个人信息":"http://服务器地址/用户id/个人信息",
+	"所持股票":"http://服务器地址/用户id/所持股票"
+}
+支持方法：
+get 获取当前用户指令
+
+http://服务器地址/用户id/个人信息
+{
+	"userid": 1,
+	"name":"zhang san",
+	"sex": male,
+	"accountNum": 1,
+	"asset": 169139.0
+}
+支持方法：
+get 读取个人信息
+put http://服务器地址/用户id/个人信息  更新所有个人信息
+//patch http://服务器地址/用户id/个人信息 修改某项，比如传送一个 "name":"haha" 就表示把"zhang san"改名成"haha"(jersey没有patch)
+
+http://服务器地址/用户id/所持股票?page=2&per_page=100：指定第几页，以及每页的记录数。
+[
+	{
+		"sid":"000002",
+		"name":"Banana"
+	},
+	{
+		"sid":"000003",
+		"name":"Sun"
+	}
+]
+支持方法:
+get 查看所有持有股票
+post http://服务器地址/用户id/所持股票   买入一个股票，返回新生成的资源对象
+
+http://服务器地址/用户id/所持股票/sid
+{
+	"sid":"000002",
+	"name":"Banana"
+}
+支持方法:
+get http://服务器地址/用户id/所持股票/sid    查看该用户所持的该只股票信息
+delete http://服务器地址/用户id/所持股票/sid   卖掉所持的所有该股票
+//patch http://服务器地址/用户id/所持股票/sid   买/卖所持的该股票的数量(jersey没有patch)
+put http://服务器地址/用户id/所持股票/sid     买/卖所持的该股票的数量
+
+http://服务器地址/大盘/
+{
+	"marketindex":2054,
+	"change":0.09,
+	"total":999999
+}
+支持方法:
+get 获取大盘信息
+
+http://服务器地址/个股?page=2&per_page=100：指定第几页，以及每页的记录数。
+[
+	{
+		"sid":"000002",
+		"name":"Banana"
+		"price":"11.0",
+		"validation":"-0.5"
+	},
+	{
+		"sid":"000003",
+		"name":"Sun"
+		"price":"11.0",
+		"validation":"-0.5"
+	}
+]
+支持方法：
+get 查看当前所有个股信息
+
+http://服务器地址/个股/sid
+{
+	"sid":"000001",
+	"name":"Apple",
+	"price":"11.0",
+	"validation":"-0.5"
+}
+支持方法：
+get 获取个股信息
+
+http://服务器地址/事件
+{
+	"description":"某某某领导个屁了"
+}
+支持方法：
+get 获取当前事件
