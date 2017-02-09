@@ -3,9 +3,9 @@ cs542HtmlCorsClient
 
 CORS WebService Client
 
-1.It connect to the local WebService for test, to call remote host, just change all the http://localhost:8080 in index.html
+1. It connect to the local WebService for test, to call remote host, just change all the http://localhost:8080 in index.html
 
-2.Use CORS technology, the Jersey WebService also have to setting fiter to accept the http request
+2. Use CORS technology, the Jersey WebService also have to setting fiter to accept the http request
 
 ```
 @Provider
@@ -25,10 +25,10 @@ public class AccessControlResponseFilter implements ContainerResponseFilter {
 
 And implement it to the applicaion setting
 
+```
 @ApplicationPath("/")
 public class DBMS extends ResourceConfig {
 
-```
 	public DBMS() {
 		.......
 		//CORS, add the line below
@@ -37,13 +37,18 @@ public class DBMS extends ResourceConfig {
 ```
 }
 
-3.One thing waste me lots of time is
+3. One thing waste me lots of time is
 
+```
    var jsonMsg = {'userID':'1','Sid':sid,'shares':amount}; 
+```
    here we can't use upper letter "Sid", can only use lower letter "sid", like below
+   
+```
    var jsonMsg = {'userID':'1','sid':sid,'shares':amount}; 
+```
 
-4.something the browse will change the POST and PUT request to OPTIONS request, make sure you have set the right ajax request, like
+4. something the browse will change the POST and PUT request to OPTIONS request, make sure you have set the right ajax request, like
 
 ```
 function buyStock(sid,amount){
@@ -74,4 +79,4 @@ function buyStock(sid,amount){
 }
 ```
 
-5.support google chrome, didn't test other browse
+5. support google chrome, didn't test other browse
