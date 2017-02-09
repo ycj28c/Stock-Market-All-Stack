@@ -43,20 +43,35 @@ public class DBMS extends ResourceConfig {
 
 function buyStock(sid,amount){
 	var jsonMsg = {'userID':'1','sid':sid,'shares':amount}; 
+	
 	var message = JSON.stringify(jsonMsg);
+	
 	$.ajax({
+	
 　　　　type: "post",
+    
 　　　　url: "http://localhost:8080/WebServices/1/hold/"+sid,
+    
 　　　　contentType: "application/json",
+    
 　　　　data: message,
+    
        crossDomain: true,
+       
 　　　　dataType: "json",
+    
 　　　　processData: false,
+    
 　　　　success: function (json) { 
+    
 			alert("buy stock success!");
+			
 		},
+		
 　　　　error: function (error) {
+    
 　　　　		alert("ERROR" + error.responseText);
+		
 　　		}
 	});
 }
