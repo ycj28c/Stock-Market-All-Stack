@@ -1,0 +1,3 @@
+[submodule "542project"]
+	path = 542project
+	url = https://github.com/tedqiao/542project.git
